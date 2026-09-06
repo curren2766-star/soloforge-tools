@@ -1,0 +1,84 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OBS録画容量・アップロード時間計算機 | SOLOFORGE Tools</title>
+<meta name="description" content="OBS等の録画ビットレートと録画時間から、予想ファイル容量、SSD保存可能時間、アップロード時間を無料計算。">
+<link rel="canonical" href="__SITE_URL__/obs-storage/">
+<link rel="stylesheet" href="../assets/style.css">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OBS録画容量・アップロード時間計算機","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}
+</script>
+</head><body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="../index.html">SOLOFORGE Tools</a>
+    <div class="nav-links">
+      <a href="../index.html">ツール一覧</a>
+      <a href="../about.html">このサイトについて</a>
+      <a href="../privacy.html">プライバシー</a>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap">
+<section class="hero">
+<div class="eyebrow">SOLOFORGE Tools</div>
+<h1>OBS録画容量・<br>アップロード時間計算機</h1>
+<p class="lead">映像ビットレートと録画時間から、予想ファイル容量、SSDに保存できる時間、アップロード完了までの目安を一画面で計算します。</p>
+</section>
+<section class="grid2">
+<div class="card">
+<h2>1. 録画条件</h2>
+<div class="fields">
+<div class="field"><label for="videoBitrate">映像ビットレート <span class="hint">Mbps</span></label><input id="videoBitrate" type="number" min="0.1" step="0.1" value="40"></div>
+<div class="field"><label for="audioBitrate">音声ビットレート <span class="hint">kbps</span></label><input id="audioBitrate" type="number" min="0" step="1" value="320"></div>
+<div class="field"><label>録画時間</label><div class="row-inline"><input id="hours" type="number" min="0" step="1" value="3" aria-label="録画時間（時間）"><input id="minutes" type="number" min="0" max="59" step="1" value="0" aria-label="録画時間（分）"></div><span class="hint">左: 時間 / 右: 分</span></div>
+<div class="field"><label for="storage">保存先SSD容量</label><select id="storage"><option value="500">500 GB</option><option value="1000" selected>1 TB</option><option value="2000">2 TB</option><option value="4000">4 TB</option></select></div>
+</div>
+<h2 style="margin-top:24px">2. 回線</h2>
+<div class="fields">
+<div class="field"><label for="uploadMbps">上り速度 <span class="hint">Mbps</span></label><input id="uploadMbps" type="number" min="0.1" step="0.1" value="30"></div>
+<div class="field"><label for="efficiency">実効速度率</label><select id="efficiency"><option value="1">100%</option><option value=".9">90%</option><option value=".85" selected>85%</option><option value=".75">75%</option></select></div>
+</div>
+<div class="actions"><button class="primary" id="calcBtn">計算する</button><button class="secondary" id="shareBtn">結果をコピー</button></div>
+<div class="status" id="status" aria-live="polite"></div>
+</div>
+
+<div class="card">
+<h2>結果</h2>
+<div class="results">
+<div class="result hero-result"><div class="k">予想ファイル容量</div><div class="v" id="fileSize">—</div><div class="s" id="fileSizeSub">入力すると計算されます</div></div>
+<div class="result"><div class="k">SSDに保存できる録画時間</div><div class="v" id="storageHours">—</div><div class="s">容量の90%まで使う前提</div></div>
+<div class="result"><div class="k">同条件の録画本数</div><div class="v" id="recordingsFit">—</div><div class="s" id="recordingsSub"></div></div>
+<div class="result"><div class="k">アップロード時間</div><div class="v" id="uploadTime">—</div><div class="s" id="uploadSub"></div></div>
+<div class="result"><div class="k">1時間あたり容量</div><div class="v" id="perHour">—</div><div class="s">映像＋音声から算出</div></div>
+</div>
+<div class="note">VBR/CQP等の可変ビットレート録画では、実際の容量は映像内容により変動します。本ツールは平均ビットレートを使った概算です。</div>
+<div class="recommend"><strong id="storageRecommendation">SSD目安：—</strong><div class="hint">アフィリエイト導入後は診断結果に応じた商品リンクを表示予定です。</div><a class="fake-link" href="#" data-affiliate="ssd" onclick="return false;">おすすめSSDを見る（準備中）</a></div>
+</div>
+</section>
+
+<section style="margin-top:24px">
+<h2>よくある質問</h2>
+<details open><summary>録画容量はどう計算していますか？</summary><p class="formula">容量(GB) = ((映像Mbps × 1,000,000) + (音声kbps × 1,000)) × 秒数 ÷ 8 ÷ 1,000,000,000</p><p>GBはストレージ製品と同じ10進法です。</p></details>
+<details><summary>CQP録画にも使えますか？</summary><p>CQPは平均ビットレートが一定ではないため正確な事前予測には向きません。過去の録画から平均Mbpsを求めて使うと近い概算になります。</p></details>
+<details><summary>アップロード時間は実際と同じですか？</summary><p>回線混雑、Wi-Fi、サービス側処理などで変動します。実効速度率を85%にした値を初期設定にしています。</p></details>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>© 2026 SOLOFORGE Tools</div>
+    <div>
+      <a href="../privacy.html">プライバシーポリシー</a> /
+      <a href="../affiliate.html">広告・アフィリエイトについて</a> /
+      <a href="../contact.html">お問い合わせ</a>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/obs-storage.js"></script>
+</body></html>
