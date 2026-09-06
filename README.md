@@ -17,7 +17,7 @@ PROJECT SOLOFORGE Factoryの公開用共通サイト土台です。
 
 ## 現在の公開設定
 
-- 公開URL: `https://current2766-star.github.io/soloforge-tools/`
+- 公開URL: `https://curren2766-star.github.io/soloforge-tools/`
 - GA4測定ID: `G-BMGC440MQL`
 - GitHub Pages: main / root
 
