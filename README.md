@@ -15,13 +15,13 @@ PROJECT SOLOFORGE Factoryの公開用共通サイト土台です。
 - robots.txt
 - sitemap.xml
 
-## 公開前に必ず置換するもの
+## 現在の公開設定
 
-1. `G-XXXXXXXXXX` → GA4測定ID
-2. `__SITE_URL__` → 正式URL（例 https://example.com）
-3. サイト名 `SOLOFORGE Tools` → 正式名称に変更する場合は一括置換
-4. 問い合わせ先
-5. アフィリエイト導入時の正式表記・リンク
+- 公開URL: `https://current2766-star.github.io/soloforge-tools/`
+- GA4測定ID: `G-BMGC440MQL`
+- GitHub Pages: main / root
+
+独自ドメインを導入した場合は canonical / sitemap / robots.txt のURLを更新します。
 
 ## 計測イベント
 
