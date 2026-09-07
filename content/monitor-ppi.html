@@ -1,0 +1,23 @@
+<section class="hero"><div class="eyebrow">MONITOR / PIXEL DENSITY</div><h1>モニターPPI比較計算機</h1><p class="lead">今のモニターと購入候補を比べて、<br>画面の細かさが何％変わるかすぐ確認。</p><p class="hint">インチ数と解像度から、PPI・ピクセルピッチ・画素密度の差を比較します。</p></section>
+<noscript><div class="note">計算にはJavaScriptを有効にしてください。計算式とFAQはそのまま読めます。</div></noscript>
+<form id="ppiForm" novalidate><div class="ppi-workspace">
+<section class="card monitor-input" aria-labelledby="aHeading"><div class="monitor-heading"><span class="monitor-letter">A</span><div><span class="hint">現在</span><h2 id="aHeading">現在のモニター</h2></div></div><div class="fields">
+<div class="field full"><label for="aPreset">代表的な構成から選ぶ</label><select id="aPreset"></select></div>
+<div class="field full"><label for="aDiagonal">対角インチ</label><div class="input-unit"><input id="aDiagonal" type="number" min="0.1" max="500" step="any" required><span>inch</span></div></div>
+<div class="field"><label for="aWidth">横解像度</label><div class="input-unit"><input id="aWidth" type="number" min="1" max="100000" step="1" required><span>px</span></div></div>
+<div class="field"><label for="aHeight">縦解像度</label><div class="input-unit"><input id="aHeight" type="number" min="1" max="100000" step="1" required><span>px</span></div></div>
+</div></section>
+<div class="versus" aria-hidden="true">VS</div>
+<section class="card monitor-input" aria-labelledby="bHeading"><div class="monitor-heading"><span class="monitor-letter candidate">B</span><div><span class="hint">購入候補</span><h2 id="bHeading">購入候補のモニター</h2></div></div><div class="fields">
+<div class="field full"><label for="bPreset">代表的な構成から選ぶ</label><select id="bPreset"></select></div>
+<div class="field full"><label for="bDiagonal">対角インチ</label><div class="input-unit"><input id="bDiagonal" type="number" min="0.1" max="500" step="any" required><span>inch</span></div></div>
+<div class="field"><label for="bWidth">横解像度</label><div class="input-unit"><input id="bWidth" type="number" min="1" max="100000" step="1" required><span>px</span></div></div>
+<div class="field"><label for="bHeight">縦解像度</label><div class="input-unit"><input id="bHeight" type="number" min="1" max="100000" step="1" required><span>px</span></div></div>
+</div></section></div>
+<div class="actions ppi-actions"><button class="primary" type="submit">画素密度を比較 <span aria-hidden="true">→</span></button></div><p id="inputStatus" class="form-status" role="status"></p></form>
+<section id="ppiResults" class="card ppi-results" aria-live="polite"><div class="panel-heading"><span class="step">RESULT</span><h2>比較結果</h2></div><p id="comparison" class="ppi-comparison"></p><div class="ppi-result-grid">
+<article><span class="monitor-tag">A · 現在</span><h3 id="aResultLabel"></h3><p><strong id="aPpi"></strong> PPI</p><span>ピクセルピッチ <b id="aPitch"></b> mm</span></article>
+<article><span class="monitor-tag candidate">B · 購入候補</span><h3 id="bResultLabel"></h3><p><strong id="bPpi"></strong> PPI</p><span>ピクセルピッチ <b id="bPitch"></b> mm</span></article></div>
+<p class="hint ppi-note">PPIはサイズと解像度から計算した画素密度です。実際の見え方は視聴距離、OSスケーリング、パネル品質、リフレッシュレート、視力や用途でも変わります。</p>
+<aside id="connectionNext" class="next-action"><span class="eyebrow">次に確認すること</span><h3>この解像度・高リフレッシュレートを、今のPCとケーブルで出せる？</h3><a class="button secondary" href="/soloforge-tools/display-bandwidth/">4K・高Hz 接続チェッカーへ <span aria-hidden="true">↗</span></a></aside></section>
+<section class="explanation"><h2>PPIとピクセルピッチの見方</h2><div class="grid3"><div><h3>PPI</h3><p>1インチあたりの画素数です。同じ画面サイズなら、解像度が高いほどPPIも高くなります。</p></div><div><h3>ピクセルピッチ</h3><p>画素1つの間隔をmmで表した値です。PPIが高くなるほど、ピクセルピッチは小さくなります。</p></div><div><h3>比較は常にA基準</h3><p>購入候補Bが現在Aより何％高い・低いかを、丸める前のPPIから計算します。</p></div></div><p class="formula">PPI = √(横px² + 縦px²) ÷ 対角インチ　／　ピクセルピッチ(mm) = 25.4 ÷ PPI</p></section>

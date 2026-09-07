@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-const pages = ['index.html','gpu-psu/index.html','display-bandwidth/index.html','obs-storage/index.html','about.html','privacy.html','contact.html','affiliate.html','404.html'];
+const pages = ['index.html','monitor-ppi/index.html','gpu-psu/index.html','display-bandwidth/index.html','obs-storage/index.html','about.html','privacy.html','contact.html','affiliate.html','404.html'];
 for (const file of pages) test(`static metadata, JSON-LD and local links: ${file}`, () => {
   const html=readFileSync(file,'utf8');
   assert.equal((html.match(/<h1[ >]/g)||[]).length,1);
@@ -23,7 +23,18 @@ test('sitemap and robots retain correct production base', () => {
   const sitemap=readFileSync('sitemap.xml','utf8');
   assert.match(sitemap,/soloforge-tools\/display-bandwidth\//);
   assert.match(sitemap,/soloforge-tools\/gpu-psu\//);
+  assert.match(sitemap,/soloforge-tools\/monitor-ppi\//);
   assert.doesNotMatch(sitemap,/404/);
   assert.match(readFileSync('robots.txt','utf8'),/Sitemap: https:\/\/curren2766-star.github.io\/soloforge-tools\/sitemap.xml/);
   assert.equal(readFileSync('google77f4dbcb8e106fb1.html','utf8').trim(),'google-site-verification: google77f4dbcb8e106fb1.html');
+});
+test('PPI tool is integrated on home and linked both ways with display checker', () => {
+  const home=readFileSync('index.html','utf8');
+  const ppi=readFileSync('monitor-ppi/index.html','utf8');
+  const display=readFileSync('display-bandwidth/index.html','utf8');
+  assert.equal((home.match(/class="card tool-card/g)||[]).length,4);
+  assert.match(home,/href="monitor-ppi\/"/);
+  assert.match(ppi,/href="\/soloforge-tools\/display-bandwidth\/"/);
+  assert.match(display,/href="\/soloforge-tools\/monitor-ppi\/"/);
+  assert.match(ppi,/"@type":"FAQPage"/);
 });

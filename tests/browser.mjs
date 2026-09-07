@@ -17,6 +17,33 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   const external = [];
   page.on('request', req => { if (!req.url().startsWith('http://127.0.0.1')) external.push(req.url()); });
+  await page.goto(base + 'monitor-ppi/');
+  await page.waitForFunction(() => document.querySelector('#comparison').textContent.includes('26.6%'));
+  check(await page.locator('#aPpi').textContent() === '108.8', 'PPI default A');
+  check(await page.locator('#bPpi').textContent() === '137.7', 'PPI default B');
+  check(await page.locator('#aPitch').textContent() === '0.233', 'pixel pitch default A');
+  check((await page.locator('#comparison').textContent()).includes('画素密度が約26.6%高い'), 'PPI comparison is primary');
+  check(await page.locator('#connectionNext').isVisible(), '4K next action visible');
+  check(await page.locator('#connectionNext a').getAttribute('href') === '/soloforge-tools/display-bandwidth/', 'PPI links to display checker');
+  await page.locator('#bPreset').selectOption('34-uwqhd');
+  check(await page.locator('#bPpi').textContent() === '109.7', 'UWQHD preset');
+  check((await page.locator('#comparison').textContent()).includes('ほぼ同じ'), 'near density wording');
+  await page.locator('#aPreset').selectOption('32-4k'); await page.locator('#bPreset').selectOption('32-4k');
+  check((await page.locator('#comparison').textContent()).includes('同じ画素密度'), 'same density wording');
+  await page.locator('#aPreset').selectOption('27-wqhd'); await page.locator('#bPreset').selectOption('32-wqhd');
+  check((await page.locator('#comparison').textContent()).includes('画素密度が約15.6%低い'), 'lower density wording');
+  await page.locator('#bDiagonal').fill('');
+  check(await page.locator('#ppiResults').isHidden(), 'empty PPI input hides stale result');
+  check(await page.locator('#inputStatus').textContent() === '', 'empty PPI input waits without error');
+  await page.locator('#bDiagonal').fill('0');
+  check((await page.locator('#inputStatus').textContent()).includes('対角インチ'), 'zero diagonal error');
+  await page.locator('#bDiagonal').fill('32'); await page.locator('#bWidth').fill('1920.5');
+  check((await page.locator('#inputStatus').textContent()).includes('整数'), 'fractional pixel error');
+  await page.locator('#bWidth').fill('100001');
+  check((await page.locator('#inputStatus').textContent()).includes('100,000'), 'huge pixel error');
+  await page.locator('#bPreset').selectOption('32-4k');
+  check(await page.locator('#ppiResults').isVisible(), 'PPI valid preset recovery');
+  await page.screenshot({ path: '.qa/monitor-ppi-desktop.png', fullPage: true });
   await page.goto(base + 'display-bandwidth/');
   await page.waitForFunction(() => document.querySelector('#bandwidth').textContent === '35.83');
   check(await page.locator('.link-result').count() === 13, 'all link classes rendered');
@@ -76,21 +103,25 @@ try {
   check(external.length===0,'local preview sends no analytics requests');
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({width,height:900});
-    for (const route of ['', 'gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
+    for (const route of ['', 'monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
       const response = await page.goto(base+route);
       check(response.status()===(route.startsWith('missing')?404:200),`route ${route} status`);
       if (route==='display-bandwidth/') await page.waitForFunction(()=>document.querySelector('#bandwidth').textContent !== '—');
       if (route==='gpu-psu/') await page.waitForFunction(()=>document.querySelector('#overall').textContent !== '—');
+      if (route==='monitor-ppi/') await page.waitForFunction(()=>document.querySelector('#comparison').textContent.includes('%'));
       check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`no overflow ${width} ${route}`);
       check(await page.locator('h1').count()===1,`one h1 ${route}`);
       check(await page.evaluate(()=>[...document.querySelectorAll('input,select')].every(el=>el.labels?.length || el.getAttribute('aria-label'))),`labelled inputs ${route}`);
-      if([1440,390].includes(width)&&['','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
+      if([1440,390].includes(width)&&['','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
     }
   }
   await page.setViewportSize({width:640,height:900});
   await page.goto(base+'display-bandwidth/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'200% text zoom has no horizontal overflow');
+  await page.goto(base+'monitor-ppi/');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+  check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'PPI 200% text zoom has no horizontal overflow');
   await page.goto(base);
   await page.keyboard.press('Tab');
   check(await page.evaluate(()=>document.activeElement.className==='skip-link'),'keyboard skip link first');
@@ -121,20 +152,25 @@ try {
   check(gpuEvents.filter(x=>x.name==='tool_start').length===1,'GPU emits one start');
   check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion');
   check(gpuEvents.every(x=>Object.keys(x.params).join(',')==='tool'),'GPU analytics excludes inputs');
-  for(const route of ['display-bandwidth/','obs-storage/']){
+  for(const route of ['monitor-ppi/','display-bandwidth/','obs-storage/']){
     await tracking.goto(production+route);
     await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
     check((await events()).length===0,'no initial tool events');
-    if(route==='display-bandwidth/'){
+    if(route==='monitor-ppi/'){
+      await tracking.locator('#bPreset').selectOption('27-4k');
+      await tracking.getByRole('button',{name:'画素密度を比較',exact:false}).click();
+    } else if(route==='display-bandwidth/'){
       await tracking.locator('#depth').selectOption('8');
       await tracking.getByRole('button',{name:'接続条件をチェック',exact:false}).click();
     } else { await tracking.locator('#videoBitrate').fill('20');await tracking.locator('#calcBtn').click();await tracking.locator('#calcBtn').click(); }
     let emitted=await events();
     check(emitted.filter(x=>x.name==='tool_start').length===1,'one start per page session');
     check(emitted.filter(x=>x.name==='tool_complete').length===1,'deduplicated completion');
-    await tracking.locator('#shareBtn').click();
-    await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='event'&&x[1]==='result_share'));
-    check((await events()).filter(x=>x.name==='result_share').length===1,'only successful copy tracked');
+    if(route!=='monitor-ppi/'){
+      await tracking.locator('#shareBtn').click();
+      await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='event'&&x[1]==='result_share'));
+      check((await events()).filter(x=>x.name==='result_share').length===1,'only successful copy tracked');
+    }
     check((await events()).every(x=>Object.keys(x.params).join(',')==='tool'),'no input values in analytics');
   }
   await tracking.evaluate(()=>{
@@ -149,7 +185,7 @@ try {
   check(!(await events()).some(x=>x.name==='outbound_affiliate_click'),'internal never tracked');
   await tracking.getByRole('link',{name:'external',exact:true}).click();
   check((await events()).filter(x=>x.name==='outbound_affiliate_click').length===1,'real external affiliate measured');
-  check(gaLoads===3,'GA loaded once per page');
+  check(gaLoads===4,'GA loaded once per page');
   const before=gaLoads;
   await tracking.goto(production+'display-bandwidth/?analytics=off');
   await tracking.waitForFunction(()=>document.querySelector('#bandwidth').textContent!=='—');
