@@ -1,0 +1,21 @@
+<section class="hero"><div class="eyebrow">DIGITAL ASSET / LISTING COPY</div><h1>BOOTH・itch.io <br>商品説明フォーマッター</h1><p class="lead">商品情報を1回入力。<br>2つの販売先向けに整形。</p><p class="hint">AIによる文章生成ではなく、入力内容を固定テンプレートへ整理するツールです。</p></section>
+<noscript><div class="note">説明文案の作成にはJavaScriptを有効にしてください。注意事項とFAQはそのまま読めます。</div></noscript>
+<section class="listing-workspace">
+<form id="listingForm" class="card listing-form" novalidate><div class="panel-heading"><span class="step">01</span><h2>商品情報を入力</h2></div>
+<div class="field"><label for="productName">商品名 <span class="required">必須</span></label><input id="productName" name="name" maxlength="160" autocomplete="off" required placeholder="例：RPG Shop &amp; Inn BGM Pack"></div>
+<div class="field"><label for="productSummary">ひとこと説明</label><textarea id="productSummary" name="summary" rows="2" maxlength="500" placeholder="商品の特徴を短く入力"></textarea></div>
+<div class="field"><label for="productContents">内容物</label><textarea id="productContents" name="contents" rows="4" maxlength="3000" placeholder="1行に1項目など、掲載したい形で入力"></textarea></div>
+<div class="field"><label for="productFormat">ファイル形式</label><textarea id="productFormat" name="format" rows="2" maxlength="1000" placeholder="例：WAV / 44.1kHz / Stereo"></textarea></div>
+<div class="field"><label for="productTerms">利用条件</label><textarea id="productTerms" name="terms" rows="4" maxlength="5000" placeholder="実際に設定した利用条件だけを入力"></textarea></div>
+<div class="field"><label for="productCredit">クレジット条件</label><textarea id="productCredit" name="credit" rows="3" maxlength="2000" placeholder="必須・任意など、実際の条件を入力"></textarea></div>
+<div class="field"><label for="productNotes">補足 <span class="muted">任意</span></label><textarea id="productNotes" name="notes" rows="3" maxlength="3000" placeholder="AI利用の開示、更新情報、注意事項など"></textarea></div>
+<div class="actions"><button class="primary" type="submit">説明文案を作成</button></div>
+<p class="hint privacy-note">入力内容と生成した説明文はブラウザ内だけで処理します。商品名・本文・価格・作者名・URL・利用条件・出力をGA4イベントへ送りません。</p></form>
+<section id="listingResults" class="card listing-results" hidden aria-labelledby="listingResultHeading"><div class="panel-heading"><span class="step">02</span><h2 id="listingResultHeading">説明文案</h2></div>
+<article class="listing-output"><div class="output-heading"><h3>BOOTH向け</h3><button class="secondary compact-button" type="button" data-copy-output="booth">コピー</button></div><textarea id="boothOutput" rows="14" readonly aria-label="BOOTH向け説明文案"></textarea></article>
+<article class="listing-output"><div class="output-heading"><h3>itch.io向け</h3><button class="secondary compact-button" type="button" data-copy-output="itch">コピー</button></div><textarea id="itchOutput" rows="14" readonly aria-label="itch.io向け説明文案"></textarea></article></section>
+</section>
+<p id="listingStatus" class="form-status listing-status" role="status" aria-live="polite"></p>
+<section class="explanation"><h2>整形するもの・しないもの</h2><div class="grid2"><div><h3>入力内容を見出し別に整理</h3><p>空欄の項目は出力から省きます。itch.io向けは英語の固定見出しを使いますが、入力した日本語を自動翻訳しません。</p></div><div><h3>利用条件は判断しない</h3><p>商用利用、改変、再配布、クレジット、著作権、AI利用、返金、Content IDなどの条件を推測・補完しません。</p></div></div>
+<div class="notice"><strong>利用前に確認してください</strong><p>このツールは入力内容を整形するだけで、BOOTH・itch.ioの規約適合性や法的有効性を判断・保証しません。公開前に各販売先の最新設定・ルールと実際の権利関係を確認してください。AI生成素材は販売先に応じた別途の開示が必要な場合があります。</p></div></section>
+<aside class="related product-related"><div><span class="eyebrow">FORMAT EXAMPLE</span><h2>掲載イメージを見る</h2><p class="muted">SOLOFORGEがitch.ioで公開しているゲームBGM素材の商品ページを、説明構成の参考例として確認できます。</p></div><div class="actions"><a class="button secondary" href="https://soloforge.itch.io/rpg-shop-inn-bgm-pack">商品ページを見る ↗</a></div></aside>

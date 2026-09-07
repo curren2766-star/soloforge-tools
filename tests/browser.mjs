@@ -26,6 +26,31 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   const external = [];
   page.on('request', req => { if (!req.url().startsWith('http://127.0.0.1')) external.push(req.url()); });
+  await page.goto(base + 'asset-listing-formatter/');
+  check(await page.locator('#listingResults').isHidden(), 'listing has no initial output');
+  await page.locator('#productName').fill('Forest Asset Pack');
+  await page.locator('#productSummary').fill('森の素材集');
+  await page.locator('#productContents').fill('tree.png\nrock.png');
+  await page.locator('#productFormat').fill('PNG');
+  await page.locator('#productTerms').fill('商用利用可');
+  await page.locator('#productCredit').fill('任意');
+  await page.getByRole('button', { name: '説明文案を作成' }).click();
+  check(await page.locator('#listingResults').isVisible(), 'listing outputs visible');
+  check((await page.locator('#boothOutput').inputValue()).includes('【内容物】\ntree.png'), 'BOOTH headings and content');
+  check((await page.locator('#itchOutput').inputValue()).includes('CONTENTS\ntree.png'), 'itch headings and content');
+  check(!(await page.locator('#itchOutput').inputValue()).includes('NOTES'), 'listing omits empty sections');
+  await page.screenshot({ path: '.qa/asset-listing-formatter-result-1440.png', fullPage: true });
+  await page.locator('#productName').fill('<img src=x onerror=alert(1)>');
+  check(await page.locator('#listingResults').isHidden(), 'listing edit hides stale output');
+  await page.getByRole('button', { name: '説明文案を作成' }).click();
+  check(await page.locator('#listingResults img').count() === 0, 'listing free text never becomes markup');
+  check((await page.locator('#boothOutput').inputValue()).startsWith('<img'), 'listing preserves plain text');
+  await page.locator('[data-copy-output="booth"]').click();
+  await page.waitForFunction(() => document.querySelector('#listingStatus').textContent.includes('コピー'));
+  check((await page.evaluate(() => navigator.clipboard.readText())).startsWith('<img'), 'listing copy succeeds');
+  await page.locator('#productName').fill('');
+  await page.getByRole('button', { name: '説明文案を作成' }).click();
+  check((await page.locator('#listingStatus').textContent()).includes('商品名'), 'listing validates product name');
   await page.goto(base + 'game-audio-loop-tester/');
   check(await page.locator('#playLoop').isDisabled(), 'audio loop play starts disabled');
   await page.locator('#audioFile').setInputFiles({ name: 'loop.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('not audio') });
@@ -149,7 +174,7 @@ try {
   check(external.length===0,'local preview sends no analytics requests');
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({width,height:900});
-    for (const route of ['', 'game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
+    for (const route of ['', 'asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
       const response = await page.goto(base+route);
       check(response.status()===(route.startsWith('missing')?404:200),`route ${route} status`);
       if (route==='display-bandwidth/') await page.waitForFunction(()=>document.querySelector('#bandwidth').textContent !== '—');
@@ -158,7 +183,7 @@ try {
       check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`no overflow ${width} ${route}`);
       check(await page.locator('h1').count()===1,`one h1 ${route}`);
       check(await page.evaluate(()=>[...document.querySelectorAll('input,select,textarea')].every(el=>el.labels?.length || el.getAttribute('aria-label'))),`labelled inputs ${route}`);
-      if([1440,390].includes(width)&&['','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
+      if([1440,390].includes(width)&&['','asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
     }
   }
   await page.setViewportSize({width:640,height:900});
@@ -168,6 +193,9 @@ try {
   await page.goto(base+'game-audio-loop-tester/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'audio loop 200% text zoom has no horizontal overflow');
+  await page.goto(base+'asset-listing-formatter/');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+  check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'listing 200% text zoom has no horizontal overflow');
   await page.goto(base+'monitor-ppi/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'PPI 200% text zoom has no horizontal overflow');
@@ -204,11 +232,15 @@ try {
   check(gpuEvents.filter(x=>x.name==='tool_start').length===1,'GPU emits one start');
   check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion');
   check(gpuEvents.every(x=>Object.keys(x.params).join(',')==='tool'),'GPU analytics excludes inputs');
-  for(const route of ['game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
+  for(const route of ['asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
     await tracking.goto(production+route);
     await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
     check((await events()).length===0,'no initial tool events');
-    if(route==='game-audio-loop-tester/'){
+    if(route==='asset-listing-formatter/'){
+      await tracking.locator('#productName').fill('Secret product name');
+      await tracking.locator('#productTerms').fill('Private license body');
+      await tracking.getByRole('button',{name:'説明文案を作成'}).click();
+    } else if(route==='game-audio-loop-tester/'){
       await tracking.locator('#audioFile').setInputFiles({name:'loop.wav',mimeType:'audio/wav',buffer:wavFixture()});
       await tracking.waitForFunction(()=>document.querySelector('#audioStatus').textContent.includes('準備できました'));
     } else if(route==='subtitle-reading-speed/'){
@@ -225,8 +257,9 @@ try {
     let emitted=await events();
     check(emitted.filter(x=>x.name==='tool_start').length===1,'one start per page session');
     check(emitted.filter(x=>x.name==='tool_complete').length===1,'deduplicated completion');
-    if(['display-bandwidth/','obs-storage/'].includes(route)){
-      await tracking.locator('#shareBtn').click();
+    if(['asset-listing-formatter/','display-bandwidth/','obs-storage/'].includes(route)){
+      if(route==='asset-listing-formatter/') await tracking.locator('[data-copy-output="booth"]').click();
+      else await tracking.locator('#shareBtn').click();
       await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='event'&&x[1]==='result_share'));
       check((await events()).filter(x=>x.name==='result_share').length===1,'only successful copy tracked');
     }
@@ -244,7 +277,7 @@ try {
   check(!(await events()).some(x=>x.name==='outbound_affiliate_click'),'internal never tracked');
   await tracking.getByRole('link',{name:'external',exact:true}).click();
   check((await events()).filter(x=>x.name==='outbound_affiliate_click').length===1,'real external affiliate measured');
-  check(gaLoads===6,'GA loaded once per page');
+  check(gaLoads===7,'GA loaded once per page');
   const before=gaLoads;
   await tracking.goto(production+'display-bandwidth/?analytics=off');
   await tracking.waitForFunction(()=>document.querySelector('#bandwidth').textContent!=='—');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-const pages = ['index.html','game-audio-loop-tester/index.html','subtitle-reading-speed/index.html','monitor-ppi/index.html','gpu-psu/index.html','display-bandwidth/index.html','obs-storage/index.html','about.html','privacy.html','contact.html','affiliate.html','404.html'];
+const pages = ['index.html','asset-listing-formatter/index.html','game-audio-loop-tester/index.html','subtitle-reading-speed/index.html','monitor-ppi/index.html','gpu-psu/index.html','display-bandwidth/index.html','obs-storage/index.html','about.html','privacy.html','contact.html','affiliate.html','404.html'];
 for (const file of pages) test(`static metadata, JSON-LD and local links: ${file}`, () => {
   const html=readFileSync(file,'utf8');
   assert.equal((html.match(/<h1[ >]/g)||[]).length,1);
@@ -26,6 +26,7 @@ test('sitemap and robots retain correct production base', () => {
   assert.match(sitemap,/soloforge-tools\/monitor-ppi\//);
   assert.match(sitemap,/soloforge-tools\/subtitle-reading-speed\//);
   assert.match(sitemap,/soloforge-tools\/game-audio-loop-tester\//);
+  assert.match(sitemap,/soloforge-tools\/asset-listing-formatter\//);
   assert.doesNotMatch(sitemap,/404/);
   assert.match(readFileSync('robots.txt','utf8'),/Sitemap: https:\/\/curren2766-star.github.io\/soloforge-tools\/sitemap.xml/);
   assert.equal(readFileSync('google77f4dbcb8e106fb1.html','utf8').trim(),'google-site-verification: google77f4dbcb8e106fb1.html');
@@ -33,7 +34,7 @@ test('sitemap and robots retain correct production base', () => {
 test('subtitle tool is integrated on home with FAQ schema', () => {
   const home=readFileSync('index.html','utf8');
   const subtitle=readFileSync('subtitle-reading-speed/index.html','utf8');
-  assert.equal((home.match(/class="card tool-card/g)||[]).length,6);
+  assert.equal((home.match(/class="card tool-card/g)||[]).length,7);
   assert.match(home,/href="subtitle-reading-speed\/"/);
   assert.match(subtitle,/"@type":"FAQPage"/);
   assert.match(subtitle,/入力内容はブラウザ内で計算/);
@@ -42,7 +43,7 @@ test('PPI tool is integrated on home and linked both ways with display checker',
   const home=readFileSync('index.html','utf8');
   const ppi=readFileSync('monitor-ppi/index.html','utf8');
   const display=readFileSync('display-bandwidth/index.html','utf8');
-  assert.equal((home.match(/class="card tool-card/g)||[]).length,6);
+  assert.equal((home.match(/class="card tool-card/g)||[]).length,7);
   assert.match(home,/href="monitor-ppi\/"/);
   assert.match(ppi,/href="\/soloforge-tools\/display-bandwidth\/"/);
   assert.match(display,/href="\/soloforge-tools\/monitor-ppi\/"/);
@@ -56,4 +57,14 @@ test('audio loop tester is private, non-judgmental and integrated', () => {
   assert.match(page,/実際のゲームエンジンや再生環境での動作を保証するものではありません/);
   assert.doesNotMatch(page,/id="(?:seamless|score|verdict)/i);
   assert.match(page,/accept="\.wav,audio\/wav,audio\/x-wav"/);
+});
+test('listing formatter omits legal inference and is integrated safely', () => {
+  const home=readFileSync('index.html','utf8');
+  const page=readFileSync('asset-listing-formatter/index.html','utf8');
+  const script=readFileSync('assets/asset-listing-formatter.js','utf8');
+  assert.match(home,/href="asset-listing-formatter\/"/);
+  assert.match(page,/AIによる文章生成ではなく/);
+  assert.match(page,/規約適合性や法的有効性を判断・保証しません/);
+  assert.match(page,/localStorageへ保存しません/);
+  assert.doesNotMatch(script,/innerHTML|localStorage/);
 });
