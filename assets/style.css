@@ -951,3 +951,116 @@ details p {
     transition:none!important
   }
 }
+
+/* GPU / PSU diagnostic */
+.gpu-workspace {
+  align-items:start
+}
+.input-unit {
+  position:relative
+}
+.input-unit input {
+  width:100%;
+  padding-right:48px
+}
+.input-unit span {
+  position:absolute;
+  right:16px;
+  top:50%;
+  color:var(--muted);
+  transform:translateY(-50%);
+  pointer-events:none
+}
+.form-status {
+  min-height:1.75em;
+  margin:10px 0 0;
+  color:var(--bad);
+  font-weight:700
+}
+.overall-result {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin:18px 0;
+  padding:18px 20px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#f7f9fc
+}
+.overall-result span {
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800
+}
+.overall-result strong {
+  font-size:22px;
+  line-height:1.35
+}
+.overall-result strong[data-status="candidate"] { color:var(--good) }
+.overall-result strong[data-status="check"] { color:var(--warning) }
+.overall-result strong[data-status="replace"] { color:var(--bad) }
+.gpu-summary {
+  margin:0 0 16px;
+  font-size:13px;
+  color:var(--muted)
+}
+.diagnosis-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px
+}
+.diagnosis-grid article {
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:14px
+}
+.diagnosis-grid article p {
+  margin:10px 0 0;
+  font-size:14px
+}
+.diagnosis-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px
+}
+.diagnosis-heading h3 {
+  margin:0;
+  font-size:16px
+}
+.result-status {
+  flex:none;
+  padding:4px 10px;
+  border-radius:999px;
+  background:var(--accent2);
+  font-size:12px;
+  font-weight:900
+}
+.result-status.ok { color:var(--good); background:#e5f5ef }
+.result-status.caution { color:var(--warning); background:#fff2d6 }
+.result-status.insufficient { color:var(--bad); background:#fde9ec }
+.safety-callout {
+  margin-top:14px;
+  padding:18px;
+  border-left:4px solid var(--warning);
+  border-radius:8px 14px 14px 8px;
+  background:#fff9ed
+}
+.safety-callout p {
+  margin:6px 0 8px;
+  font-size:14px
+}
+.psu-suggestion {
+  margin-top:14px;
+  padding:18px;
+  border:1px dashed #9eabc0;
+  border-radius:14px;
+  background:#f7f9fc
+}
+.psu-suggestion h3,.psu-suggestion p { margin:4px 0 8px }
+@media(max-width:560px) {
+  .diagnosis-grid { grid-template-columns:1fr }
+  .overall-result { align-items:flex-start; flex-direction:column }
+  .overall-result strong { font-size:20px }
+}

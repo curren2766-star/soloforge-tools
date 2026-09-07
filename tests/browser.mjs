@@ -62,17 +62,29 @@ try {
   check(await page.locator('#obsResults').isHidden(),'OBS minutes upper limit');
   await page.locator('#minutes').fill('30');
   check(await page.locator('#fileSize').textContent()==='1.80 GB','OBS valid recovery');
+  await page.goto(base+'gpu-psu/');
+  await page.waitForFunction(()=>document.querySelector('#overall').textContent!=='—');
+  check((await page.locator('#overall').textContent())==='PSU確認必要','GPU safe default requires confirmation');
+  await page.locator('#gpu').selectOption('rx-7800-xt');
+  await page.locator('#psuWatts').fill('850');
+  check((await page.locator('#overall').textContent())==='そのまま交換候補','GPU reference OK case');
+  await page.locator('#eightPinCables').selectOption('1');
+  check((await page.locator('#connectorBadge').textContent())==='不足','GPU connector shortage');
+  check((await page.locator('#overall').textContent())==='PSU交換候補','GPU shortage overall');
+  await page.locator('#gpu').selectOption('rtx-5090');
+  check((await page.locator('#capacityBadge').textContent())==='不足','GPU capacity shortage');
   check(external.length===0,'local preview sends no analytics requests');
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({width,height:900});
-    for (const route of ['', 'display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
+    for (const route of ['', 'gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
       const response = await page.goto(base+route);
       check(response.status()===(route.startsWith('missing')?404:200),`route ${route} status`);
       if (route==='display-bandwidth/') await page.waitForFunction(()=>document.querySelector('#bandwidth').textContent !== '—');
+      if (route==='gpu-psu/') await page.waitForFunction(()=>document.querySelector('#overall').textContent !== '—');
       check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`no overflow ${width} ${route}`);
       check(await page.locator('h1').count()===1,`one h1 ${route}`);
       check(await page.evaluate(()=>[...document.querySelectorAll('input,select')].every(el=>el.labels?.length || el.getAttribute('aria-label'))),`labelled inputs ${route}`);
-      if([1440,390].includes(width)&&['','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
+      if([1440,390].includes(width)&&['','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
     }
   }
   await page.setViewportSize({width:640,height:900});
@@ -101,6 +113,14 @@ try {
   });
   const tracking = await trackingContext.newPage();
   const events = () => tracking.evaluate(()=>window.dataLayer.filter(x=>x[0]==='event').map(x=>({name:x[1],params:x[2]})));
+  await tracking.goto(production+'gpu-psu/');
+  await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
+  check((await events()).length===0,'GPU has no initial tool events');
+  await tracking.locator('#psuWatts').fill('850');
+  let gpuEvents=await events();
+  check(gpuEvents.filter(x=>x.name==='tool_start').length===1,'GPU emits one start');
+  check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion');
+  check(gpuEvents.every(x=>Object.keys(x.params).join(',')==='tool'),'GPU analytics excludes inputs');
   for(const route of ['display-bandwidth/','obs-storage/']){
     await tracking.goto(production+route);
     await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
@@ -129,7 +149,7 @@ try {
   check(!(await events()).some(x=>x.name==='outbound_affiliate_click'),'internal never tracked');
   await tracking.getByRole('link',{name:'external',exact:true}).click();
   check((await events()).filter(x=>x.name==='outbound_affiliate_click').length===1,'real external affiliate measured');
-  check(gaLoads===2,'GA loaded once per page');
+  check(gaLoads===3,'GA loaded once per page');
   const before=gaLoads;
   await tracking.goto(production+'display-bandwidth/?analytics=off');
   await tracking.waitForFunction(()=>document.querySelector('#bandwidth').textContent!=='—');

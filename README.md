@@ -4,8 +4,7 @@
 
 - 公開：https://curren2766-star.github.io/soloforge-tools/
 - GitHub Pages：main / root（生成済みHTMLをコミット）
-- 公開ツール：/obs-storage/、/display-bandwidth/
-- 次回候補：/gpu-psu/。未公開のためリンク・sitemapに追加しない。
+- 公開ツール：/gpu-psu/、/obs-storage/、/display-bandwidth/
 - GA4：G-BMGC440MQL
 
 ## 開発と検証
@@ -32,9 +31,13 @@ npmがある環境では `npm run build`、`npm test`、`npm run dev` も同じ�
 | assets/site.js | GA4、セッション、コピー、実アフィリエイト計測 |
 | assets/display-model.js | DOM非依存の帯域式・クラスデータ・判定 |
 | assets/display-bandwidth.js | 新ツールの入力・結果表示 |
+| assets/gpu-data.js | GPUシリーズの公式参考値と出典URL |
+| assets/gpu-psu-model.js | DOM非依存の容量・コネクタ判定 |
+| assets/gpu-psu.js | GPU電源診断の入力・結果表示 |
 | assets/obs-storage.js | 既存OBS式・表示 |
 | tests/ | 数値・境界値・SEO・リンク・ブラウザ・計測テスト |
 | docs/display-method.md | 技術判断と公式出典 |
+| docs/gpu-psu-method.md | GPU電源診断の判定方針と公式出典 |
 
 1. content/<slug>.htmlに本文、assets/<slug>.jsにUIを書く。計算モデルはDOMから分離する。
 2. 共通CSSのcard、fields、actions、badge等を使う。site.jsをimportし、固定のtool識別子で計測する。
@@ -65,6 +68,8 @@ npmがある環境では `npm run build`、`npm test`、`npm run dev` も同じ�
 OBSは従来の10進GB式、SSDの90%を利用可能とする前提、上り速度×実効率を維持。無効入力時は古い結果とコピーを無効にする。
 
 ディスプレイはactive video基準。HDR倍率なし、色形式とbit深度を分離。DSCは条件付き。バージョン名で実機最大帯域を断定せず、HDMI 64/80/96Gbps級の実効値は未確定。詳細と出典は[判定資料](docs/display-method.md)。
+
+GPU電源診断はメーカーのシリーズ参考PSU値と補助電源条件を入口にし、CPUクラスと余裕幅、独立PCIeケーブル本数、16-pin定格を別々に判定する。個別カードの仕様差を明記し、モジュラーケーブル流用や非指定変換を案内しない。詳細は[判定資料](docs/gpu-psu-method.md)。
 
 ## 公開前確認
 

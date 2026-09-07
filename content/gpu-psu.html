@@ -1,0 +1,19 @@
+<section class="hero"><div class="eyebrow">GPU UPGRADE / POWER CHECK</div><h1>グラボ交換 電源・コネクタ診断</h1><p class="lead">このグラボ、今の電源で大丈夫？<br>GPUを選び、PSU容量とケーブルを入力すると2つを分けて確認できます。</p></section>
+<noscript><div class="note">診断にはJavaScriptを有効にしてください。安全上の注意とFAQはそのまま読めます。</div></noscript>
+<div class="workspace gpu-workspace">
+<section class="card input-panel" aria-labelledby="gpuInputHeading"><div class="panel-heading"><span class="step">01</span><h2 id="gpuInputHeading">交換条件を入力</h2></div>
+<form id="gpuForm" novalidate><div class="fields">
+<div class="field full"><label for="gpu">交換したいGPU</label><select id="gpu" required></select><span class="hint">シリーズの一般的な参考値です。購入予定カードの正式仕様を最後に確認してください。</span></div>
+<div class="field"><label for="psuWatts">現在のPSU容量</label><div class="input-unit"><input id="psuWatts" type="number" min="300" max="2000" step="50" value="750" required><span>W</span></div></div>
+<div class="field"><label for="eightPinCables">PCIe 8-pinケーブル</label><select id="eightPinCables"><option value="0">0本</option><option value="1">1本</option><option value="2" selected>2本</option><option value="3">3本</option><option value="4">4本以上</option></select><span class="hint">PSUから別々に出せる本数。1本の分岐ケーブルは1本として数えます。</span></div>
+<div class="field"><label for="native16">ネイティブ16-pinケーブル</label><select id="native16"><option value="0">なし</option><option value="unknown">あるが定格不明</option><option value="300">300W対応</option><option value="450">450W対応</option><option value="600">600W対応</option></select><span class="hint">12V-2x6 / 12VHPWR。PSU仕様書にある定格を選択。</span></div>
+<div class="field" id="cpuField" hidden><label for="cpuClass">CPU消費電力クラス</label><select id="cpuClass"><option value="standard" selected>標準 · Ryzen 5/7、Core 5/7級</option><option value="high">高め · Ryzen 9、Core 9級</option><option value="extreme">OC・高負荷構成</option></select><span class="hint">高消費電力GPUのため確認します。高性能CPUやOC構成では余裕を追加します。</span></div>
+</div><p id="inputStatus" class="form-status" role="status"></p></form></section>
+<section class="card result-panel gpu-result" id="results" aria-live="polite"><div class="panel-heading"><span class="step">02</span><h2>診断結果</h2></div>
+<div class="overall-result"><span>総合判定</span><strong id="overall" data-status="check">—</strong></div>
+<p id="gpuSummary" class="gpu-summary"></p>
+<div class="diagnosis-grid"><article><div class="diagnosis-heading"><h3>電源容量</h3><span id="capacityBadge" class="result-status">—</span></div><p id="capacityReason"></p></article><article><div class="diagnosis-heading"><h3>コネクタ</h3><span id="connectorBadge" class="result-status">—</span></div><p id="connectorReason"></p><p id="connectorReference" class="hint"></p></article></div>
+<div class="safety-callout"><strong>購入・接続前の最終確認</strong><p>使用中PSUと購入予定GPUのメーカー公式仕様を照合してください。モジュラーPSUのケーブルは、同じ形でも別メーカー・別シリーズへ流用できません。市販の変換ケーブルで条件を回避せず、GPU付属品またはPSUメーカーがその型番向けに指定したケーブルだけを使ってください。</p><a id="officialSource" href="#" target="_blank" rel="noopener">選択GPUのメーカー参考仕様を見る ↗</a></div>
+<aside id="psuSuggestion" class="psu-suggestion" hidden><span class="eyebrow">将来の電源選び</span><h3><span id="psuTier"></span>から確認</h3><p>容量だけでなく、必要なネイティブ16-pin定格、PCIeケーブル本数、ATX規格、保証期間を確認してください。</p><span class="badge neutral">製品案内は準備中</span></aside>
+</section></div>
+<section class="explanation"><h2>判定の見方</h2><div class="grid3"><div><h3>容量と端子を別判定</h3><p>W数が足りても、必要な補助電源を正しい独立ケーブルで用意できなければ交換候補にはできません。</p></div><div><h3>シリーズ値は入口</h3><p>表示値はリファレンス設計の一般的な目安です。OCモデルやメーカー独自基板では推奨容量と端子が異なる場合があります。</p></div><div><h3>「OK」も保証ではない</h3><p>入力条件が参考値を満たす表示です。PSUの型番、経年、12V出力、ケース内配線、購入カードの仕様は別途確認が必要です。</p></div></div></section>
