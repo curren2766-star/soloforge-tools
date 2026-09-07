@@ -1117,3 +1117,17 @@ details p {
 .next-action .button{flex:none}
 @media(max-width:760px){.ppi-workspace{grid-template-columns:1fr}.versus{margin:-7px auto;position:relative;z-index:2}.next-action{align-items:flex-start;flex-direction:column}}
 @media(max-width:420px){.ppi-result-grid{grid-template-columns:1fr}.ppi-comparison{font-size:22px;text-align:left}.monitor-input .fields{grid-template-columns:1fr 1fr}.monitor-input .field.full{grid-column:1/-1}.next-action .button{width:100%;text-align:center}}
+
+/* Game audio loop tester */
+.loop-tool{max-width:880px;margin-inline:auto;border-top:4px solid var(--accent);padding-top:25px}
+.audio-drop-zone{display:grid;place-items:center;gap:6px;min-height:220px;padding:28px;border:2px dashed #9eabc0;border-radius:16px;background:#f7f9fc;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.audio-drop-zone:hover,.audio-drop-zone:focus-within,.audio-drop-zone.dragging{border-color:var(--accent);background:#edf5ff}
+.audio-drop-zone strong{font-size:22px}
+.audio-drop-zone span,.audio-drop-zone small{color:var(--muted)}
+.visually-hidden-file{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.loop-controls{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-top:20px}
+.compact-field{min-width:160px;margin:0}
+.loop-actions{margin:0;flex-wrap:wrap}
+.audio-status{color:var(--text)}
+.product-related .actions{margin:0;flex-wrap:wrap}
+@media(max-width:620px){.audio-drop-zone{min-height:180px}.loop-controls{align-items:stretch;flex-direction:column}.compact-field{width:100%}.loop-actions button{flex:1}.product-related .actions{width:100%}.product-related .button{width:100%;text-align:center}}

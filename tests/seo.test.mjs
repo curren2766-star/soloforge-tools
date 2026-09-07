@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const base = 'https://curren2766-star.github.io/soloforge-tools/';
 const indexable = new Map([
   ['index.html', base],
+  ['game-audio-loop-tester/index.html', base + 'game-audio-loop-tester/'],
   ['subtitle-reading-speed/index.html', base + 'subtitle-reading-speed/'],
   ['monitor-ppi/index.html', base + 'monitor-ppi/'],
   ['gpu-psu/index.html', base + 'gpu-psu/'],

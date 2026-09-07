@@ -4,7 +4,7 @@
 
 - 公開：https://curren2766-star.github.io/soloforge-tools/
 - GitHub Pages：main / root（生成済みHTMLをコミット）
-- 公開ツール：/subtitle-reading-speed/、/monitor-ppi/、/gpu-psu/、/obs-storage/、/display-bandwidth/
+- 公開ツール：/game-audio-loop-tester/、/subtitle-reading-speed/、/monitor-ppi/、/gpu-psu/、/obs-storage/、/display-bandwidth/
 - GA4：G-BMGC440MQL
 
 ## 開発と検証
@@ -29,6 +29,8 @@ npmがある環境では `npm run build`、`npm test`、`npm run dev` も同じ�
 | content/*.html | ツール本文の編集元 |
 | assets/style.css | 共通トークン、カード、フォーム、結果、ステータス |
 | assets/site.js | GA4、セッション、コピー、実アフィリエイト計測 |
+| assets/game-audio-loop-model.js | WAVファイルとAudioBufferの入力ガード、確認区間計算 |
+| assets/game-audio-loop-tester.js | WAV decode、末尾→先頭バッファ作成、ループ再生 |
 | assets/display-model.js | DOM非依存の帯域式・クラスデータ・判定 |
 | assets/display-bandwidth.js | 新ツールの入力・結果表示 |
 | assets/gpu-data.js | GPUシリーズの公式参考値と出典URL |

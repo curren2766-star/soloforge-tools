@@ -11,12 +11,37 @@ mkdirSync('.qa', { recursive: true });
 const errors = [];
 let checks = 0;
 const check = (condition, message) => { assert.ok(condition, message); checks++; };
+const wavFixture = () => {
+  const sampleRate = 8000, frames = 8000, bytes = Buffer.alloc(44 + frames * 2);
+  bytes.write('RIFF', 0); bytes.writeUInt32LE(bytes.length - 8, 4); bytes.write('WAVE', 8);
+  bytes.write('fmt ', 12); bytes.writeUInt32LE(16, 16); bytes.writeUInt16LE(1, 20); bytes.writeUInt16LE(1, 22);
+  bytes.writeUInt32LE(sampleRate, 24); bytes.writeUInt32LE(sampleRate * 2, 28); bytes.writeUInt16LE(2, 32); bytes.writeUInt16LE(16, 34);
+  bytes.write('data', 36); bytes.writeUInt32LE(frames * 2, 40);
+  for (let i = 0; i < frames; i++) bytes.writeInt16LE(Math.round(Math.sin(i / 12) * 6000), 44 + i * 2);
+  return bytes;
+};
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, permissions: ['clipboard-read','clipboard-write'] });
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
   const external = [];
   page.on('request', req => { if (!req.url().startsWith('http://127.0.0.1')) external.push(req.url()); });
+  await page.goto(base + 'game-audio-loop-tester/');
+  check(await page.locator('#playLoop').isDisabled(), 'audio loop play starts disabled');
+  await page.locator('#audioFile').setInputFiles({ name: 'loop.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('not audio') });
+  check((await page.locator('#audioStatus').textContent()).includes('初版はWAV'), 'audio loop rejects non-WAV');
+  await page.locator('#audioFile').setInputFiles({ name: 'loop.wav', mimeType: 'audio/wav', buffer: Buffer.from('invalid wav') });
+  await page.waitForFunction(() => document.querySelector('#audioStatus').textContent.includes('このブラウザでは'));
+  check(await page.locator('#playLoop').isDisabled(), 'audio loop decode failure stays disabled');
+  await page.locator('#audioFile').setInputFiles({ name: 'loop.wav', mimeType: 'audio/wav', buffer: wavFixture() });
+  await page.waitForFunction(() => document.querySelector('#audioStatus').textContent.includes('準備できました'));
+  check(await page.locator('#playLoop').isEnabled(), 'audio loop valid WAV ready');
+  await page.locator('#segmentSeconds').selectOption('1');
+  check((await page.locator('#audioStatus').textContent()).includes('確認区間を更新'), 'audio loop segment update');
+  await page.locator('#playLoop').click();
+  check((await page.locator('#audioStatus').textContent()).includes('繰り返し再生'), 'audio loop playback starts');
+  await page.locator('#stopLoop').click();
+  check((await page.locator('#audioStatus').textContent()).includes('もう一度確認'), 'audio loop playback stops and can replay');
   await page.goto(base + 'subtitle-reading-speed/');
   check(await page.locator('#subtitleResults').isHidden(), 'subtitle has no initial result');
   await page.locator('#subtitleText').fill('字'.repeat(20));
@@ -124,7 +149,7 @@ try {
   check(external.length===0,'local preview sends no analytics requests');
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({width,height:900});
-    for (const route of ['', 'subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
+    for (const route of ['', 'game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
       const response = await page.goto(base+route);
       check(response.status()===(route.startsWith('missing')?404:200),`route ${route} status`);
       if (route==='display-bandwidth/') await page.waitForFunction(()=>document.querySelector('#bandwidth').textContent !== '—');
@@ -133,13 +158,16 @@ try {
       check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`no overflow ${width} ${route}`);
       check(await page.locator('h1').count()===1,`one h1 ${route}`);
       check(await page.evaluate(()=>[...document.querySelectorAll('input,select,textarea')].every(el=>el.labels?.length || el.getAttribute('aria-label'))),`labelled inputs ${route}`);
-      if([1440,390].includes(width)&&['','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
+      if([1440,390].includes(width)&&['','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
     }
   }
   await page.setViewportSize({width:640,height:900});
   await page.goto(base+'display-bandwidth/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'200% text zoom has no horizontal overflow');
+  await page.goto(base+'game-audio-loop-tester/');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+  check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'audio loop 200% text zoom has no horizontal overflow');
   await page.goto(base+'monitor-ppi/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'PPI 200% text zoom has no horizontal overflow');
@@ -176,11 +204,14 @@ try {
   check(gpuEvents.filter(x=>x.name==='tool_start').length===1,'GPU emits one start');
   check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion');
   check(gpuEvents.every(x=>Object.keys(x.params).join(',')==='tool'),'GPU analytics excludes inputs');
-  for(const route of ['subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
+  for(const route of ['game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
     await tracking.goto(production+route);
     await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
     check((await events()).length===0,'no initial tool events');
-    if(route==='subtitle-reading-speed/'){
+    if(route==='game-audio-loop-tester/'){
+      await tracking.locator('#audioFile').setInputFiles({name:'loop.wav',mimeType:'audio/wav',buffer:wavFixture()});
+      await tracking.waitForFunction(()=>document.querySelector('#audioStatus').textContent.includes('準備できました'));
+    } else if(route==='subtitle-reading-speed/'){
       await tracking.locator('#subtitleText').fill('テスト字幕です');
       await tracking.locator('#displaySeconds').fill('2');
       await tracking.getByRole('button',{name:'読み速度を確認',exact:false}).click();
@@ -194,7 +225,7 @@ try {
     let emitted=await events();
     check(emitted.filter(x=>x.name==='tool_start').length===1,'one start per page session');
     check(emitted.filter(x=>x.name==='tool_complete').length===1,'deduplicated completion');
-    if(!['monitor-ppi/','subtitle-reading-speed/'].includes(route)){
+    if(['display-bandwidth/','obs-storage/'].includes(route)){
       await tracking.locator('#shareBtn').click();
       await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='event'&&x[1]==='result_share'));
       check((await events()).filter(x=>x.name==='result_share').length===1,'only successful copy tracked');
@@ -213,7 +244,7 @@ try {
   check(!(await events()).some(x=>x.name==='outbound_affiliate_click'),'internal never tracked');
   await tracking.getByRole('link',{name:'external',exact:true}).click();
   check((await events()).filter(x=>x.name==='outbound_affiliate_click').length===1,'real external affiliate measured');
-  check(gaLoads===5,'GA loaded once per page');
+  check(gaLoads===6,'GA loaded once per page');
   const before=gaLoads;
   await tracking.goto(production+'display-bandwidth/?analytics=off');
   await tracking.waitForFunction(()=>document.querySelector('#bandwidth').textContent!=='—');
