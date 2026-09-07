@@ -26,6 +26,44 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   const external = [];
   page.on('request', req => { if (!req.url().startsWith('http://127.0.0.1')) external.push(req.url()); });
+  await page.goto(base + 'game-asset-credits/');
+  check(await page.locator('.asset-entry').count() === 5, 'credits starts with five quick-entry rows');
+  check(await page.locator('#creditsResults').isHidden(), 'credits has no initial output');
+  await page.locator('#asset-1-name').fill('Village Tiles');
+  await page.locator('#asset-1-author').fill('Maker');
+  await page.locator('#asset-1-url').fill('https://example.com/asset');
+  await page.locator('#asset-1-credit').fill('Maker表記必須');
+  await page.locator('#asset-1-license').fill('Custom License');
+  await page.locator('#asset-1-ai').selectOption('yes');
+  await page.locator('#asset-1-aiUsage').fill('下絵に使用');
+  await page.locator('#asset-2-name').fill('Unknown Audio');
+  await page.getByRole('button', { name: 'Credits案を作成' }).click();
+  check(await page.locator('#creditsResults').isVisible(), 'credits outputs visible');
+  check((await page.locator('#creditsTxt').inputValue()).includes('AI利用: 不明（要確認）'), 'credits preserves unknown AI');
+  check((await page.locator('#creditsMarkdown').inputValue()).includes('## 1. Village Tiles'), 'credits Markdown output');
+  check((await page.locator('#creditsShort').inputValue()).includes('Unknown Audio — 未確認'), 'credits short output');
+  check((await page.locator('#creditsAi').inputValue()).includes('Village Tiles: 下絵に使用'), 'credits AI disclosure output');
+  await page.screenshot({ path: '.qa/game-asset-credits-result-1440.png', fullPage: true });
+  await page.locator('[data-copy-credit="txt"]').click();
+  await page.waitForFunction(() => document.querySelector('#creditsStatus').textContent.includes('コピー'));
+  check((await page.evaluate(() => navigator.clipboard.readText())).includes('Village Tiles'), 'credits copy succeeds');
+  const txtDownload = page.waitForEvent('download');
+  await page.locator('[data-download-credit="txt"]').click();
+  check((await txtDownload).suggestedFilename() === 'CREDITS.txt', 'credits TXT download');
+  const mdDownload = page.waitForEvent('download');
+  await page.locator('[data-download-credit="markdown"]').click();
+  check((await mdDownload).suggestedFilename() === 'CREDITS.md', 'credits Markdown download');
+  await page.locator('#asset-1-name').fill('<img src=x onerror=alert(1)>');
+  check(await page.locator('#creditsResults').isHidden(), 'credits edit hides stale output');
+  await page.getByRole('button', { name: 'Credits案を作成' }).click();
+  check(await page.locator('#creditsResults img').count() === 0, 'credits free text never becomes markup');
+  await page.locator('#asset-1-url').fill('javascript:alert(1)');
+  await page.getByRole('button', { name: 'Credits案を作成' }).click();
+  check((await page.locator('#creditsStatus').textContent()).includes('http://'), 'credits rejects unsafe URL scheme');
+  await page.locator('#addAsset').click();
+  check(await page.locator('.asset-entry').count() === 6, 'credits adds an entry');
+  await page.locator('.asset-entry').last().locator('[data-remove]').click();
+  check(await page.locator('.asset-entry').count() === 5, 'credits removes an entry');
   await page.goto(base + 'asset-listing-formatter/');
   check(await page.locator('#listingResults').isHidden(), 'listing has no initial output');
   await page.locator('#productName').fill('Forest Asset Pack');
@@ -174,7 +212,7 @@ try {
   check(external.length===0,'local preview sends no analytics requests');
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({width,height:900});
-    for (const route of ['', 'asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
+    for (const route of ['', 'game-asset-credits/','asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
       const response = await page.goto(base+route);
       check(response.status()===(route.startsWith('missing')?404:200),`route ${route} status`);
       if (route==='display-bandwidth/') await page.waitForFunction(()=>document.querySelector('#bandwidth').textContent !== '—');
@@ -183,7 +221,7 @@ try {
       check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`no overflow ${width} ${route}`);
       check(await page.locator('h1').count()===1,`one h1 ${route}`);
       check(await page.evaluate(()=>[...document.querySelectorAll('input,select,textarea')].every(el=>el.labels?.length || el.getAttribute('aria-label'))),`labelled inputs ${route}`);
-      if([1440,390].includes(width)&&['','asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
+      if([1440,390].includes(width)&&['','game-asset-credits/','asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
     }
   }
   await page.setViewportSize({width:640,height:900});
@@ -196,6 +234,9 @@ try {
   await page.goto(base+'asset-listing-formatter/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'listing 200% text zoom has no horizontal overflow');
+  await page.goto(base+'game-asset-credits/');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+  check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'credits 200% text zoom has no horizontal overflow');
   await page.goto(base+'monitor-ppi/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'PPI 200% text zoom has no horizontal overflow');
@@ -232,11 +273,16 @@ try {
   check(gpuEvents.filter(x=>x.name==='tool_start').length===1,'GPU emits one start');
   check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion');
   check(gpuEvents.every(x=>Object.keys(x.params).join(',')==='tool'),'GPU analytics excludes inputs');
-  for(const route of ['asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
+  for(const route of ['game-asset-credits/','asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
     await tracking.goto(production+route);
     await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
     check((await events()).length===0,'no initial tool events');
-    if(route==='asset-listing-formatter/'){
+    if(route==='game-asset-credits/'){
+      await tracking.locator('#asset-1-name').fill('Secret asset');
+      await tracking.locator('#asset-1-author').fill('Private author');
+      await tracking.locator('#asset-1-url').fill('https://example.com/private');
+      await tracking.getByRole('button',{name:'Credits案を作成'}).click();
+    } else if(route==='asset-listing-formatter/'){
       await tracking.locator('#productName').fill('Secret product name');
       await tracking.locator('#productTerms').fill('Private license body');
       await tracking.getByRole('button',{name:'説明文案を作成'}).click();
@@ -257,8 +303,9 @@ try {
     let emitted=await events();
     check(emitted.filter(x=>x.name==='tool_start').length===1,'one start per page session');
     check(emitted.filter(x=>x.name==='tool_complete').length===1,'deduplicated completion');
-    if(['asset-listing-formatter/','display-bandwidth/','obs-storage/'].includes(route)){
-      if(route==='asset-listing-formatter/') await tracking.locator('[data-copy-output="booth"]').click();
+    if(['game-asset-credits/','asset-listing-formatter/','display-bandwidth/','obs-storage/'].includes(route)){
+      if(route==='game-asset-credits/') await tracking.locator('[data-copy-credit="txt"]').click();
+      else if(route==='asset-listing-formatter/') await tracking.locator('[data-copy-output="booth"]').click();
       else await tracking.locator('#shareBtn').click();
       await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='event'&&x[1]==='result_share'));
       check((await events()).filter(x=>x.name==='result_share').length===1,'only successful copy tracked');
@@ -277,7 +324,7 @@ try {
   check(!(await events()).some(x=>x.name==='outbound_affiliate_click'),'internal never tracked');
   await tracking.getByRole('link',{name:'external',exact:true}).click();
   check((await events()).filter(x=>x.name==='outbound_affiliate_click').length===1,'real external affiliate measured');
-  check(gaLoads===7,'GA loaded once per page');
+  check(gaLoads===8,'GA loaded once per page');
   const before=gaLoads;
   await tracking.goto(production+'display-bandwidth/?analytics=off');
   await tracking.waitForFunction(()=>document.querySelector('#bandwidth').textContent!=='—');

@@ -1,0 +1,23 @@
+<section class="hero"><div class="eyebrow">GAME ASSET / CREDIT SHEET</div><h1>ゲーム素材 <br>Credits メーカー</h1><p class="lead">素材情報をまとめて入力。<br>Credits表記を4形式で整理。</p><p class="hint">素材の許諾やライセンスを判定せず、入力情報と未確認項目を一覧化します。</p></section>
+<noscript><div class="note">Credits案の作成にはJavaScriptを有効にしてください。注意事項とFAQはそのまま読めます。</div></noscript>
+<form id="creditsForm" novalidate><section class="card credits-input"><div class="panel-heading"><span class="step">01</span><h2>使用素材を登録</h2><span id="assetCount" class="entry-count">5 / 20</span></div><p class="hint">空の行は無視します。作者・ライセンス・AI利用が不明な項目は、確認待ちとして出力します。</p>
+<div id="assetEntries" class="asset-entries"></div>
+<div class="credits-form-actions"><button id="addAsset" class="secondary" type="button">＋ 素材を追加</button><button class="primary" type="submit">Credits案を作成</button></div>
+<p class="hint privacy-note">入力内容と出力はブラウザ内だけで処理します。素材名・作者・URL・ライセンス・クレジット条件・AI情報・本文をGA4イベントへ送りません。</p></section></form>
+<template id="assetEntryTemplate"><fieldset class="asset-entry"><legend data-entry-number>素材</legend><div class="entry-heading"><span>素材情報</span><button class="text-button" type="button" data-remove>この素材を削除</button></div><div class="fields asset-fields">
+<div class="field"><label data-label="name">素材名</label><input data-field="name" maxlength="200" autocomplete="off" placeholder="例：Village Tileset"></div>
+<div class="field"><label data-label="author">作者</label><input data-field="author" maxlength="200" autocomplete="off" placeholder="不明なら空欄"></div>
+<div class="field full"><label data-label="url">配布元URL</label><input data-field="url" type="url" maxlength="1000" autocomplete="off" placeholder="https://..."></div>
+<div class="field"><label data-label="credit">クレジット条件</label><textarea data-field="credit" rows="2" maxlength="2000" placeholder="必須・任意など。推測せず原文を入力"></textarea></div>
+<div class="field"><label data-label="license">ライセンス</label><textarea data-field="license" rows="2" maxlength="2000" placeholder="不明なら空欄"></textarea></div>
+<div class="field"><label data-label="ai">AI利用</label><select data-field="ai"><option value="unknown">不明・要確認</option><option value="no">使用なし</option><option value="yes">使用あり</option></select></div>
+<div class="field"><label data-label="aiUsage">AI利用箇所</label><input data-field="aiUsage" maxlength="1000" autocomplete="off" placeholder="使用ありの場合のみ入力"></div>
+</div></fieldset></template>
+<p id="creditsStatus" class="form-status credits-status" role="status" aria-live="polite"></p>
+<section id="creditsResults" class="credits-results" hidden aria-labelledby="creditsResultHeading"><div class="panel-heading"><span class="step">02</span><h2 id="creditsResultHeading">Credits案</h2></div><div class="credits-output-grid">
+<article class="card credit-output"><div class="output-heading"><h3>CREDITS.txt</h3><div><button class="secondary compact-button" type="button" data-copy-credit="txt">コピー</button><button class="secondary compact-button" type="button" data-download-credit="txt">TXT保存</button></div></div><textarea id="creditsTxt" rows="14" readonly aria-label="CREDITS.txt案"></textarea></article>
+<article class="card credit-output"><div class="output-heading"><h3>Markdown</h3><div><button class="secondary compact-button" type="button" data-copy-credit="markdown">コピー</button><button class="secondary compact-button" type="button" data-download-credit="markdown">MD保存</button></div></div><textarea id="creditsMarkdown" rows="14" readonly aria-label="Markdown Credits案"></textarea></article>
+<article class="card credit-output"><div class="output-heading"><h3>ゲーム内短縮版</h3><button class="secondary compact-button" type="button" data-copy-credit="short">コピー</button></div><textarea id="creditsShort" rows="7" readonly aria-label="ゲーム内短縮Credits案"></textarea></article>
+<article class="card credit-output"><div class="output-heading"><h3>AI利用開示案</h3><button class="secondary compact-button" type="button" data-copy-credit="aiDisclosure">コピー</button></div><textarea id="creditsAi" rows="7" readonly aria-label="AI利用開示案"></textarea><p class="hint">実際の制作工程と販売先・配布先の表示要件に合わせて確認・編集してください。</p></article></div></section>
+<section class="explanation"><h2>Credits整理の考え方</h2><div class="grid2"><div><h3>未確認を「なし」にしない</h3><p>作者不明は「未確認」、ライセンス不明は「未確認（公開前に要確認）」、AI利用不明は「不明（要確認）」として出力します。</p></div><div><h3>権利条件は原典で確認</h3><p>利用可否、商用利用、改変、再配布、クレジットの法的十分性を判定・補完しません。配布元の最新条件を確認してください。</p></div></div>
+<div class="notice"><strong>公開前に必ず確認してください</strong><p>このツールは入力情報をCredits案へ整形するだけで、素材の使用許諾、ライセンス適合性、法的十分性、販売先・配布先の規約適合性を判断・保証しません。URL・作者名・表記指定・AI利用状況を原典と照合してください。</p></div></section>

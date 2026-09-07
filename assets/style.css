@@ -1146,3 +1146,26 @@ details p {
 .listing-status{max-width:920px;margin:14px auto 0;color:var(--text)}
 @media(max-width:820px){.listing-workspace{grid-template-columns:1fr}.listing-status{max-width:none}}
 @media(max-width:420px){.output-heading{align-items:stretch;flex-direction:column}.compact-button{width:100%}}
+
+/* Game asset credits maker */
+.credits-input{border-top:4px solid var(--accent);padding-top:25px}
+.credits-input .panel-heading{align-items:center}
+.entry-count{margin-left:auto;color:var(--muted);font-size:13px;font-weight:850}
+.asset-entries{display:grid;gap:16px;margin-top:20px}
+.asset-entry{min-width:0;margin:0;padding:18px;border:1px solid var(--line);border-radius:14px;background:#f7f9fc}
+.asset-entry legend{padding:3px 9px;border-radius:999px;background:var(--text);color:#fff;font-size:12px;font-weight:850}
+.entry-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.entry-heading>span{font-weight:850}
+.text-button{padding:4px;border:0;background:none;color:var(--bad);font:inherit;font-size:13px;font-weight:750;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.text-button:disabled{visibility:hidden}
+.asset-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.asset-fields .full{grid-column:1/-1}
+.asset-fields textarea{width:100%;resize:vertical;line-height:1.55}
+.credits-form-actions{display:flex;justify-content:space-between;gap:12px;margin-top:20px;flex-wrap:wrap}
+.credits-status{color:var(--text)}
+.credits-results{margin-top:30px;padding-top:25px;border-top:4px solid var(--accent)}
+.credits-output-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.credit-output textarea{width:100%;resize:vertical;line-height:1.6}
+.output-heading>div{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:760px){.asset-fields,.credits-output-grid{grid-template-columns:1fr}.asset-fields .full{grid-column:auto}.credits-form-actions button{flex:1}}
+@media(max-width:420px){.entry-heading{align-items:flex-start;flex-direction:column}.credits-form-actions{flex-direction:column}.credits-form-actions button{width:100%}.output-heading>div{width:100%}.output-heading>div button{flex:1}}

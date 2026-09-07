@@ -4,7 +4,7 @@
 
 - 公開：https://curren2766-star.github.io/soloforge-tools/
 - GitHub Pages：main / root（生成済みHTMLをコミット）
-- 公開ツール：/asset-listing-formatter/、/game-audio-loop-tester/、/subtitle-reading-speed/、/monitor-ppi/、/gpu-psu/、/obs-storage/、/display-bandwidth/
+- 公開ツール：/game-asset-credits/、/asset-listing-formatter/、/game-audio-loop-tester/、/subtitle-reading-speed/、/monitor-ppi/、/gpu-psu/、/obs-storage/、/display-bandwidth/
 - GA4：G-BMGC440MQL
 
 ## 開発と検証
@@ -29,6 +29,8 @@ npmがある環境では `npm run build`、`npm test`、`npm run dev` も同じ�
 | content/*.html | ツール本文の編集元 |
 | assets/style.css | 共通トークン、カード、フォーム、結果、ステータス |
 | assets/site.js | GA4、セッション、コピー、実アフィリエイト計測 |
+| assets/game-asset-credits-model.js | Credits 4形式の整形、未確認状態、URL検証 |
+| assets/game-asset-credits.js | 素材行の追加・削除、コピー、TXT・Markdown保存 |
 | assets/asset-listing-model.js | BOOTH・itch.io向け固定見出しと空欄省略の整形 |
 | assets/asset-listing-formatter.js | 商品情報入力、説明文案表示、コピー |
 | assets/game-audio-loop-model.js | WAVファイルとAudioBufferの入力ガード、確認区間計算 |
