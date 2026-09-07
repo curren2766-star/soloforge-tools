@@ -26,6 +26,7 @@ test('capacity below official recommendation is insufficient', () => {
 test('missing independent PCIe cables is connector insufficient', () => {
   const result=diagnose(gpuById('rx-9070-xt'),{psuWatts:850,eightPinCables:1,native16:'0',cpuClass:'standard'});
   assert.equal(result.connector.status,'insufficient'); assert.equal(result.overall.status,'replace');
+  assert.equal(result.suggestedTier,750);
 });
 
 test('included adapter route and unknown native rating require confirmation', () => {

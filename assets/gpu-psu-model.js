@@ -36,10 +36,11 @@ export function diagnose(gpu, { psuWatts, eightPinCables, native16, cpuClass='st
   }
   const overallStatus = capacityStatus === 'insufficient' || connectorStatus === 'insufficient'
     ? 'replace' : capacityStatus === 'caution' || connectorStatus === 'caution' ? 'check' : 'candidate';
+  const psuTiers = [650, 750, 850, 1000, 1200, 1500];
   return {
     capacity:{ status:capacityStatus, label:labels[capacityStatus], reason:capacityReason },
     connector:{ status:connectorStatus, label:labels[connectorStatus], reason:connectorReason },
     overall:{ status:overallStatus, label:{ candidate:'そのまま交換候補', check:'PSU確認必要', replace:'PSU交換候補' }[overallStatus] },
-    target, suggestedTier: Math.max(650, Math.ceil(target / 100) * 100)
+    target, suggestedTier: psuTiers.find(watts => watts >= target) ?? Math.ceil(target / 100) * 100
   };
 }
