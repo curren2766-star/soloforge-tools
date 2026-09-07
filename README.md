@@ -4,7 +4,7 @@
 
 - 公開：https://curren2766-star.github.io/soloforge-tools/
 - GitHub Pages：main / root（生成済みHTMLをコミット）
-- 公開ツール：/monitor-ppi/、/gpu-psu/、/obs-storage/、/display-bandwidth/
+- 公開ツール：/subtitle-reading-speed/、/monitor-ppi/、/gpu-psu/、/obs-storage/、/display-bandwidth/
 - GA4：G-BMGC440MQL
 
 ## 開発と検証
@@ -36,11 +36,14 @@ npmがある環境では `npm run build`、`npm test`、`npm run dev` も同じ�
 | assets/gpu-psu.js | GPU電源診断の入力・結果表示 |
 | assets/monitor-ppi-model.js | DOM非依存のPPI・比較計算とプリセット |
 | assets/monitor-ppi.js | モニターA/Bの入力・比較結果表示 |
+| assets/subtitle-reading-model.js | DOM非依存の文字数・CPS・表示時間計算 |
+| assets/subtitle-reading-speed.js | 字幕入力・読み速度結果表示 |
 | assets/obs-storage.js | 既存OBS式・表示 |
 | tests/ | 数値・境界値・SEO・リンク・ブラウザ・計測テスト |
 | docs/display-method.md | 技術判断と公式出典 |
 | docs/gpu-psu-method.md | GPU電源診断の判定方針と公式出典 |
 | docs/monitor-ppi-method.md | PPI・ピクセルピッチ・比較率の計算方針 |
+| docs/subtitle-reading-method.md | 書記素カウント・CPS・表示時間の計算方針 |
 
 1. content/<slug>.htmlに本文、assets/<slug>.jsにUIを書く。計算モデルはDOMから分離する。
 2. 共通CSSのcard、fields、actions、badge等を使う。site.jsをimportし、固定のtool識別子で計測する。
@@ -75,6 +78,8 @@ OBSは従来の10進GB式、SSDの90%を利用可能とする前提、上り速�
 GPU電源診断はメーカーのシリーズ参考PSU値と補助電源条件を入口にし、CPUクラスと余裕幅、独立PCIeケーブル本数、16-pin定格を別々に判定する。個別カードの仕様差を明記し、モジュラーケーブル流用や非指定変換を案内しない。詳細は[判定資料](docs/gpu-psu-method.md)。
 
 モニターPPI比較は、対角インチと横・縦解像度から未丸めのPPIを求め、現在Aを分母として購入候補Bとの差を計算する。PPIを画質の総合評価とは扱わない。詳細は[計算資料](docs/monitor-ppi-method.md)。
+
+字幕読み速度は、前後の空白と改行を除外した書記素クラスタ数を表示秒数で割る。4〜6文字/秒を表示時間の参考レンジに使い、可読性を断定しない。詳細は[計算資料](docs/subtitle-reading-method.md)。
 
 ## 公開前確認
 

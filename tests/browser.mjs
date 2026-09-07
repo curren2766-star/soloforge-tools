@@ -17,6 +17,27 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   const external = [];
   page.on('request', req => { if (!req.url().startsWith('http://127.0.0.1')) external.push(req.url()); });
+  await page.goto(base + 'subtitle-reading-speed/');
+  check(await page.locator('#subtitleResults').isHidden(), 'subtitle has no initial result');
+  await page.locator('#subtitleText').fill('字'.repeat(20));
+  await page.locator('#displaySeconds').fill('5');
+  await page.getByRole('button', { name: '読み速度を確認', exact: false }).click();
+  check(await page.locator('#characterCount').textContent() === '20', 'subtitle character count');
+  check(await page.locator('#cps').textContent() === '4.0', 'subtitle CPS');
+  check(await page.locator('#speedLabel').textContent() === '標準的な範囲', 'subtitle standard band');
+  check(await page.locator('#timeGuide').textContent() === '約3.4〜5.0秒', 'subtitle time guide rounds up');
+  await page.locator('#subtitleText').fill('👨‍👩‍👧‍👦\n😀 A');
+  await page.locator('#displaySeconds').fill('1');
+  await page.getByRole('button', { name: '読み速度を確認', exact: false }).click();
+  check(await page.locator('#characterCount').textContent() === '4', 'subtitle graphemes and newline');
+  check(await page.locator('#speedLabel').textContent() === '標準的な範囲', 'subtitle Unicode result');
+  await page.locator('#displaySeconds').fill('0');
+  check(await page.locator('#subtitleResults').isHidden(), 'subtitle edit hides stale result');
+  await page.getByRole('button', { name: '読み速度を確認', exact: false }).click();
+  check((await page.locator('#inputStatus').textContent()).includes('0より大きい'), 'subtitle invalid seconds error');
+  await page.locator('#displaySeconds').fill('2');
+  await page.getByRole('button', { name: '読み速度を確認', exact: false }).click();
+  check(await page.locator('#subtitleResults').isVisible(), 'subtitle valid recovery');
   await page.goto(base + 'monitor-ppi/');
   await page.waitForFunction(() => document.querySelector('#comparison').textContent.includes('26.6%'));
   check(await page.locator('#aPpi').textContent() === '108.8', 'PPI default A');
@@ -103,7 +124,7 @@ try {
   check(external.length===0,'local preview sends no analytics requests');
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({width,height:900});
-    for (const route of ['', 'monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
+    for (const route of ['', 'subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/','privacy.html','contact.html','affiliate.html','about.html','missing/deep/route']) {
       const response = await page.goto(base+route);
       check(response.status()===(route.startsWith('missing')?404:200),`route ${route} status`);
       if (route==='display-bandwidth/') await page.waitForFunction(()=>document.querySelector('#bandwidth').textContent !== '—');
@@ -111,8 +132,8 @@ try {
       if (route==='monitor-ppi/') await page.waitForFunction(()=>document.querySelector('#comparison').textContent.includes('%'));
       check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`no overflow ${width} ${route}`);
       check(await page.locator('h1').count()===1,`one h1 ${route}`);
-      check(await page.evaluate(()=>[...document.querySelectorAll('input,select')].every(el=>el.labels?.length || el.getAttribute('aria-label'))),`labelled inputs ${route}`);
-      if([1440,390].includes(width)&&['','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
+      check(await page.evaluate(()=>[...document.querySelectorAll('input,select,textarea')].every(el=>el.labels?.length || el.getAttribute('aria-label'))),`labelled inputs ${route}`);
+      if([1440,390].includes(width)&&['','subtitle-reading-speed/','monitor-ppi/','gpu-psu/','display-bandwidth/','obs-storage/'].includes(route)) await page.screenshot({path:`.qa/${route?route.replace('/',''):'home'}-${width}.png`,fullPage:true});
     }
   }
   await page.setViewportSize({width:640,height:900});
@@ -122,6 +143,9 @@ try {
   await page.goto(base+'monitor-ppi/');
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'PPI 200% text zoom has no horizontal overflow');
+  await page.goto(base+'subtitle-reading-speed/');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+  check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'subtitle 200% text zoom has no horizontal overflow');
   await page.goto(base);
   await page.keyboard.press('Tab');
   check(await page.evaluate(()=>document.activeElement.className==='skip-link'),'keyboard skip link first');
@@ -152,11 +176,15 @@ try {
   check(gpuEvents.filter(x=>x.name==='tool_start').length===1,'GPU emits one start');
   check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion');
   check(gpuEvents.every(x=>Object.keys(x.params).join(',')==='tool'),'GPU analytics excludes inputs');
-  for(const route of ['monitor-ppi/','display-bandwidth/','obs-storage/']){
+  for(const route of ['subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
     await tracking.goto(production+route);
     await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
     check((await events()).length===0,'no initial tool events');
-    if(route==='monitor-ppi/'){
+    if(route==='subtitle-reading-speed/'){
+      await tracking.locator('#subtitleText').fill('テスト字幕です');
+      await tracking.locator('#displaySeconds').fill('2');
+      await tracking.getByRole('button',{name:'読み速度を確認',exact:false}).click();
+    } else if(route==='monitor-ppi/'){
       await tracking.locator('#bPreset').selectOption('27-4k');
       await tracking.getByRole('button',{name:'画素密度を比較',exact:false}).click();
     } else if(route==='display-bandwidth/'){
@@ -166,7 +194,7 @@ try {
     let emitted=await events();
     check(emitted.filter(x=>x.name==='tool_start').length===1,'one start per page session');
     check(emitted.filter(x=>x.name==='tool_complete').length===1,'deduplicated completion');
-    if(route!=='monitor-ppi/'){
+    if(!['monitor-ppi/','subtitle-reading-speed/'].includes(route)){
       await tracking.locator('#shareBtn').click();
       await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='event'&&x[1]==='result_share'));
       check((await events()).filter(x=>x.name==='result_share').length===1,'only successful copy tracked');
@@ -185,7 +213,7 @@ try {
   check(!(await events()).some(x=>x.name==='outbound_affiliate_click'),'internal never tracked');
   await tracking.getByRole('link',{name:'external',exact:true}).click();
   check((await events()).filter(x=>x.name==='outbound_affiliate_click').length===1,'real external affiliate measured');
-  check(gaLoads===4,'GA loaded once per page');
+  check(gaLoads===5,'GA loaded once per page');
   const before=gaLoads;
   await tracking.goto(production+'display-bandwidth/?analytics=off');
   await tracking.waitForFunction(()=>document.querySelector('#bandwidth').textContent!=='—');

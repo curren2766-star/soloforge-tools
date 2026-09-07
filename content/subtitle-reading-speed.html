@@ -1,0 +1,11 @@
+<section class="hero"><div class="eyebrow">CREATOR / SUBTITLE</div><h1>字幕読み速度チェッカー</h1><p class="lead">この字幕、表示時間内に読める？<br>文章と秒数を入れるだけで確認。</p><p class="hint">文字数・1秒あたり文字数・読み速度の目安をすぐ表示します。</p></section>
+<noscript><div class="note">計算にはJavaScriptを有効にしてください。判定基準とFAQはそのまま読めます。</div></noscript>
+<div class="subtitle-workspace"><form id="subtitleForm" class="card subtitle-form" novalidate><div class="panel-heading"><span class="step">01</span><h2>字幕と表示秒数を入力</h2></div>
+<div class="field"><div class="field-heading"><label for="subtitleText">字幕・テロップ文章</label><span id="liveCount" class="hint">0 / 5,000文字</span></div><textarea id="subtitleText" rows="7" placeholder="例：今日から使える編集のコツを紹介します" required></textarea><span class="hint">前後の空白を除き、改行自体は文字数に含めません。</span></div>
+<div class="field seconds-field"><label for="displaySeconds">表示秒数</label><div class="input-unit"><input id="displaySeconds" type="number" min="0.1" max="3600" step="any" inputmode="decimal" placeholder="2.5" required><span>秒</span></div></div>
+<div class="actions"><button class="primary" type="submit">読み速度を確認 <span aria-hidden="true">→</span></button></div><p id="inputStatus" class="form-status" role="status"></p><p class="hint privacy-note">入力内容はブラウザ内で計算され、当サイトのサーバーへ送信しません。</p></form>
+<section id="subtitleResults" class="card subtitle-results" aria-live="polite" hidden><div class="panel-heading"><span class="step">RESULT</span><h2>確認結果</h2></div><div class="subtitle-metrics">
+<article><span>表示文字数（改行除く）</span><p><strong id="characterCount"></strong> 文字</p></article><article><span>1秒あたり</span><p><strong id="cps"></strong> 文字/秒</p></article></div>
+<div class="speed-verdict"><span>読み速度の目安</span><strong id="speedLabel"></strong><p id="judgement"></p></div><div class="time-guide"><span>表示時間の目安</span><strong id="timeGuide"></strong><small>4〜6文字/秒を参考レンジとして計算</small></div>
+<p class="hint subtitle-note">読み速度は一般的な目安です。文章の難しさ、英数字やURLの量、映像の情報量、文字サイズ、視聴者などによって読みやすさは変わります。</p></section></div>
+<section class="explanation"><h2>判定の見方</h2><div class="grid2"><div><h3>文字/秒（CPS）</h3><p>表示文字数を表示秒数で割った値です。判定には、表示用に丸める前の値を使います。</p></div><div><h3>表示時間の目安</h3><p>4〜6文字/秒を参考レンジとし、短い字幕でも最低0.5秒になるよう計算します。</p></div></div><p class="formula">CPS = 表示文字数 ÷ 表示秒数　／　目安 = 表示文字数 ÷ 6 〜 表示文字数 ÷ 4</p></section>
