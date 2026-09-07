@@ -44,6 +44,7 @@ npmがある環境では `npm run build`、`npm test`、`npm run dev` も同じ�
 | docs/gpu-psu-method.md | GPU電源診断の判定方針と公式出典 |
 | docs/monitor-ppi-method.md | PPI・ピクセルピッチ・比較率の計算方針 |
 | docs/subtitle-reading-method.md | 書記素カウント・CPS・表示時間の計算方針 |
+| docs/seo-audit.md | 公開ページのSEO・クロール・内部リンク監査記録 |
 
 1. content/<slug>.htmlに本文、assets/<slug>.jsにUIを書く。計算モデルはDOMから分離する。
 2. 共通CSSのcard、fields、actions、badge等を使う。site.jsをimportし、固定のtool識別子で計測する。
