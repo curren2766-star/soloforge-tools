@@ -16,12 +16,13 @@ export function track(name, tool, extra = {}) {
 }
 export function session(tool) {
   let started = false;
-  let completed = '';
+  let completed = false;
   return {
     start() { if (!started) { track('tool_start', tool); started = true; } },
-    complete(signature) {
-      this.start();
-      if (signature !== completed) { track('tool_complete', tool); completed = signature; }
+    complete() {
+      if (!started || completed) return;
+      track('tool_complete', tool);
+      completed = true;
     }
   };
 }

@@ -68,7 +68,7 @@ npmがある環境では `npm run build`、`npm test`、`npm run dev` も同じ�
 | --- | --- |
 | page_view | GA4標準。独自に二重送信しない |
 | tool_start | 初回の入力／計算／プリセット操作。ページ滞在につき1回 |
-| tool_complete | changeによる入力確定、計算ボタン、プリセットで有効結果が得られたとき。連続する同条件を重複送信しない |
+| tool_complete | 操作開始後に有効結果が初めて得られたとき。ページ滞在につき1回 |
 | result_share | クリップボードへのコピー成功時のみ |
 | outbound_affiliate_click | a[data-affiliate]の実HTTP(S)外部リンク操作のみ。内部・ハッシュ・準備中は対象外 |
 

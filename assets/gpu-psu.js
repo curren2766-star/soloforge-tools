@@ -36,5 +36,5 @@ function render() {
   $('psuSuggestion').hidden=result.overall.status!=='replace'; $('psuTier').textContent=`${result.suggestedTier}Wクラス`;
   if (interacted) analytics.complete(`${result.overall.status}:${result.capacity.status}:${result.connector.status}`);
 }
-const update = () => { interacted = true; render(); };
+const update = () => { interacted = true; analytics.start(); render(); };
 form.addEventListener('input', update); form.addEventListener('change', update); render();

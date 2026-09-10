@@ -268,10 +268,16 @@ try {
   await tracking.goto(production+'gpu-psu/');
   await tracking.waitForFunction(()=>window.dataLayer.some(x=>x[0]==='config'));
   check((await events()).length===0,'GPU has no initial tool events');
+  await tracking.evaluate(async()=>{
+    const {session}=await import('/soloforge-tools/assets/site.js');
+    session('guard_probe').complete();
+  });
+  check((await events()).length===0,'completion cannot start a session implicitly');
   await tracking.locator('#psuWatts').fill('850');
+  await tracking.locator('#psuWatts').fill('900');
   let gpuEvents=await events();
   check(gpuEvents.filter(x=>x.name==='tool_start').length===1,'GPU emits one start');
-  check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion');
+  check(gpuEvents.filter(x=>x.name==='tool_complete').length===1,'GPU emits one completion despite changed results');
   check(gpuEvents.every(x=>Object.keys(x.params).join(',')==='tool'),'GPU analytics excludes inputs');
   for(const route of ['game-asset-credits/','asset-listing-formatter/','game-audio-loop-tester/','subtitle-reading-speed/','monitor-ppi/','display-bandwidth/','obs-storage/']){
     await tracking.goto(production+route);
