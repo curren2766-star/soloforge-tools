@@ -13,6 +13,7 @@ const indexable = new Map([
   ['gpu-psu/index.html', base + 'gpu-psu/'],
   ['display-bandwidth/index.html', base + 'display-bandwidth/'],
   ['obs-storage/index.html', base + 'obs-storage/'],
+  ['en/obs-storage/index.html', base + 'en/obs-storage/'],
   ['about.html', base + 'about.html'],
   ['privacy.html', base + 'privacy.html'],
   ['affiliate.html', base + 'affiliate.html'],
@@ -25,7 +26,7 @@ const one = (source, pattern, label) => {
   assert.equal(matches.length, 1, label);
   return matches[0][1];
 };
-const strip = value => value.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+const strip = value => value.replace(/<[^>]+>/g, '').replaceAll('&amp;', '&').replace(/\s+/g, ' ').trim();
 
 test('indexable pages have unique metadata, exact canonicals and matching OGP', () => {
   const titles = new Set();
@@ -90,7 +91,7 @@ test('sitemap is unique and exactly matches indexable canonicals', () => {
 
 test('all tools are crawlable from home and related clusters use descriptive links', () => {
   const home = html('index.html');
-  for (const file of tools) assert.match(home, new RegExp(`href="${file.replace('index.html', '')}"`), `${file} home link`);
+  for (const file of tools.filter(file => !file.startsWith('en/'))) assert.match(home, new RegExp(`href="${file.replace('index.html', '')}"`), `${file} home link`);
   const subtitle = html('subtitle-reading-speed/index.html');
   const obs = html('obs-storage/index.html');
   const ppi = html('monitor-ppi/index.html');

@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-const pages = ['index.html','game-asset-credits/index.html','asset-listing-formatter/index.html','game-audio-loop-tester/index.html','subtitle-reading-speed/index.html','monitor-ppi/index.html','gpu-psu/index.html','display-bandwidth/index.html','obs-storage/index.html','about.html','privacy.html','contact.html','affiliate.html','404.html'];
+const pages = ['index.html','game-asset-credits/index.html','asset-listing-formatter/index.html','game-audio-loop-tester/index.html','subtitle-reading-speed/index.html','monitor-ppi/index.html','gpu-psu/index.html','display-bandwidth/index.html','obs-storage/index.html','en/obs-storage/index.html','about.html','privacy.html','contact.html','affiliate.html','404.html'];
 for (const file of pages) test(`static metadata, JSON-LD and local links: ${file}`, () => {
   const html=readFileSync(file,'utf8');
   assert.equal((html.match(/<h1[ >]/g)||[]).length,1);
-  assert.match(html,/<html lang="ja">/); assert.match(html,/<meta name="description"/);
+  assert.match(html,file==='en/obs-storage/index.html'?/<html lang="en">/:/<html lang="ja">/); assert.match(html,/<meta name="description"/);
   assert.match(html,/<meta property="og:url"/);
   assert.match(html,file==='404.html'?/name="robots" content="noindex"/:/rel="canonical" href="https:\/\/curren2766-star.github.io\/soloforge-tools\//);
   for (const [,json] of html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)) assert.ok(JSON.parse(json)['@context']);
@@ -18,6 +18,15 @@ for (const file of pages) test(`static metadata, JSON-LD and local links: ${file
   }
   assert.doesNotMatch(html,/data-affiliate|準備段階|正式公開時に/);
   assert.doesNotMatch(html,/googletagmanager.com/);
+});
+test('English OBS calculator is localized and linked reciprocally', () => {
+  const ja=readFileSync('obs-storage/index.html','utf8');
+  const en=readFileSync('en/obs-storage/index.html','utf8');
+  assert.match(en,/OBS Recording File Size/);
+  assert.match(en,/hreflang="en"/);
+  assert.match(ja,/href="\/soloforge-tools\/en\/obs-storage\/"/);
+  assert.match(en,/href="\/soloforge-tools\/obs-storage\/"/);
+  assert.match(readFileSync('sitemap.xml','utf8'),/soloforge-tools\/en\/obs-storage\//);
 });
 test('sitemap and robots retain correct production base', () => {
   const sitemap=readFileSync('sitemap.xml','utf8');
